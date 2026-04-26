@@ -57,6 +57,10 @@ sed -i 's/#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
+# root 密码
+echp "Set root password:"
+passwd
+
 # 网络
 systemctl enable NetworkManager
 

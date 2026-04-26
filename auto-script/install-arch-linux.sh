@@ -47,6 +47,21 @@ genfstab -U /mnt > /mnt/etc/fstab
 
 LUKS_UUID=$(blkid -s UUID -o value "$LUKS_PART")
 
+# root 密码
+while true ; do
+    read -rsp "Set root password: " PASSWORD
+    echo
+    read -rsp "Enter password again: " PASSWORD2
+    echo
+
+    if [[ "$PASSWORD" == "$PASSWORD2" ]] ; then
+        break
+    fi
+    echo "The passwords entered twice do not match!"
+done
+
+echo "root:${PASSWORD}" | arch-chroot /mnt chpasswd
+
 arch-chroot /mnt /bin/bash << EOF
 # 时间
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -56,10 +71,6 @@ hwclock --systohc
 sed -i 's/#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
-# root 密码
-echp "Set root password:"
-passwd
 
 # 网络
 systemctl enable NetworkManager

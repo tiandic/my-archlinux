@@ -8,3 +8,5 @@
 如果你在寻找一个`arch linux`配置指南,那么可以看看本仓库,看看以前的新手是如何一步一步配置他的`arch linux`的
 
 那么话不多说,让我们开启这趟心潮澎湃的旅程吧!
+
+[wiki](https://github.com/tiandic/my-archlinux/wiki)

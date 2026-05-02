@@ -33,17 +33,29 @@ cryptsetup open "$LUKS_PART" cryptroot
 # 格式化分区
 mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 "$BOOT_PART"
-mkfs.ext4 /dev/mapper/cryptroot
+mkfs.btrfs /dev/mapper/cryptroot
+mount /dev/mapper/cryptroot /mnt
+btrfs subvolume create /mnt/@{,home,var,tmp,snapshots,swap}
+umount /mnt
 
 # 挂载分区
-mount /dev/mapper/cryptroot /mnt
+mount -o subvol=@,compress=zstd,noatime,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt
+
+mkdir -p /mnt/{home,var,snapshots,tmp,swap,boot/efi}
+
 mount --mkdir "$BOOT_PART" /mnt/boot
 mount --mkdir "$EFI_PART" /mnt/boot/efi
 
-# 安装系统
-pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub efibootmgr
+mount -o subvol=@home,compress=zstd,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt/home
+mount -o subvol=@var,compress=zstd,noatime,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt/var
+mount -o subvol=@snapshots,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/snapshots
+mount -o subvol=@tmp,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/tmp
+mount -o subvol=@swap,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/swap
 
-genfstab -U /mnt > /mnt/etc/fstab
+# 安装系统
+pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub efibootmgr btrfs-progs
+
+genfstab -U /mnt >> /mnt/etc/fstab
 
 LUKS_UUID=$(blkid -s UUID -o value "$LUKS_PART")
 

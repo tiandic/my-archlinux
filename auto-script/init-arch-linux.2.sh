@@ -10,7 +10,7 @@ snapper -c home create-config /home
 # / 的配置
 sed -i 's/ALLOW_GROUPS=""/ALLOW_GROUPS="wheel"/' /etc/snapper/configs/root
 sed -Ei 's/NUMBER_LIMIT="[0-9]+"/NUMBER_LIMIT="15"/' /etc/snapper/configs/root
-sed -Ei 's/TIMELINE_LIMIT_HOURLY="[0-9]+"/TIMELINE_LIMIT_HOURLY="1"/' /etc/snapper/configs/root
+sed -Ei 's/TIMELINE_LIMIT_HOURLY="[0-9]+"/TIMELINE_LIMIT_HOURLY="3"/' /etc/snapper/configs/root
 sed -Ei 's/TIMELINE_LIMIT_DAILY="[0-9]+"/TIMELINE_LIMIT_DAILY="1"/' /etc/snapper/configs/root
  
 sed -Ei 's/TIMELINE_MIN_AGE="[0-9]+"/TIMELINE_MIN_AGE="0"/' /etc/snapper/configs/root

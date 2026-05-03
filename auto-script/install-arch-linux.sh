@@ -52,6 +52,8 @@ mount -o subvol=@snapshots,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/sna
 mount -o subvol=@tmp,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/tmp
 mount -o subvol=@swap,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/swap
 
+mkdir -p /mnt/var/{log,cache,tmp}
+
 chattr +C /mnt/var/log
 chattr +C /mnt/var/cache
 chattr +C /mnt/var/tmp

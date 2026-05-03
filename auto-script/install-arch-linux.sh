@@ -52,6 +52,10 @@ mount -o subvol=@snapshots,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/sna
 mount -o subvol=@tmp,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/tmp
 mount -o subvol=@swap,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/swap
 
+chattr +C /mnt/var/log
+chattr +C /mnt/var/cache
+chattr +C /mnt/var/tmp
+
 # 安装系统
 pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub efibootmgr btrfs-progs
 

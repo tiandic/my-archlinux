@@ -35,28 +35,20 @@ mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 "$BOOT_PART"
 mkfs.btrfs /dev/mapper/cryptroot
 mount /dev/mapper/cryptroot /mnt
-btrfs subvolume create /mnt/@{,home,var,tmp,snapshots,swap}
+btrfs subvolume create /mnt/@{,home,swap}
 umount /mnt
 
 # 挂载分区
 mount -o subvol=@,compress=zstd,noatime,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt
 
-mkdir -p /mnt/{home,var,snapshots,tmp,swap,boot/efi}
+mkdir -p /mnt/{home,swap,boot}
 
-mount --mkdir "$BOOT_PART" /mnt/boot
-mount --mkdir "$EFI_PART" /mnt/boot/efi
+mount "$BOOT_PART" /mnt/boot
+mkdir /mnt/boot/efi
+mount "$EFI_PART" /mnt/boot/efi
 
 mount -o subvol=@home,compress=zstd,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt/home
-mount -o subvol=@var,compress=zstd,noatime,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt/var
-mount -o subvol=@snapshots,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/snapshots
-mount -o subvol=@tmp,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/tmp
 mount -o subvol=@swap,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/swap
-
-mkdir -p /mnt/var/{log,cache,tmp}
-
-chattr +C /mnt/var/log
-chattr +C /mnt/var/cache
-chattr +C /mnt/var/tmp
 
 # 安装系统
 pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub efibootmgr btrfs-progs

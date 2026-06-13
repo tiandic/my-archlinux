@@ -31,9 +31,7 @@ pacman -Syu --noconfirm --needed archlinuxcn-keyring
 # 安装AUR助手,字体,音视频,性能模式
 pacman -S --noconfirm --needed base-devel yay noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-jetbrains-mono-nerd sof-firmware alsa-ucm-conf pipewire wireplumber pipewire-pulse pipewire-alsa pipewire-jack
 
-machinectl shell "${user_name}@.host" << EOF
-systemctl --user enable --now pipewire pipewire-pulse wireplumber
-EOF
+machinectl shell "${user_name}@.host" /usr/bin/systemctl --user enable --now pipewire pipewire-pulse wireplumber
 
 pacman -S --noconfirm --needed power-profiles-daemon bluez
 systemctl enable --now power-profiles-daemon bluetooth

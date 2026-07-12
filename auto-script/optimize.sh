@@ -69,7 +69,7 @@ stow zsh
 stow waybar
 stow niri
 
-sudo pacman -S --noconfirm --needed keyd
+yay -S --noconfirm --needed keyd
 echo "# /etc/keyd/default.conf
 
 [ids]

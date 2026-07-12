@@ -51,13 +51,13 @@ rm -rf plana-themes
 git clone --recursive https://github.com/tiandic/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-back_config(){
-    local name="$1"
-    [ -e "~/.config/${name}" ] && mv "~/.config/${name}" "~/.config/${name}.$(date +'%Y-%m-%d_%H:%M.%S').bak"
+back_config() {
+  local name="$1"
+  [ -e "~/.config/${name}" ] && mv "~/.config/${name}" "~/.config/${name}.$(date +'%Y-%m-%d_%H:%M.%S').bak"
 }
 
 for n in "niri" "rofi" "waybar" "kitty" "nvim"; do
-    back_config "$n"
+  back_config "$n"
 done
 
 [ -e ~/.zshrc ] && mv ~/.zshrc "~/.zshrc.$(date +"%Y-%m-%d_%H:%M.%S").bak"
@@ -80,3 +80,27 @@ overload_tap_timeout = 300
 
 [main]
 leftmeta = overload(meta, macro(leftmeta+0))" | sudo tee /etc/keyd/default.conf
+
+echo "LANG=zh_CN.UTF-8" | sudo tee /etc/locale.conf
+
+sudo python3 -c '
+with open("/etc/default/grub") as f:
+    lines=f.readlines()
+
+out_lines=[]
+
+for line in lines:
+    if not line.startswith("GRUB_CMDLINE_LINUX="):
+        out_lines.append(line)
+    else:
+        if line.count("\"")!=2:
+            print("Please manually add \"rd.luks.options=tries=0\" to GRUB_CMDLINE_LINUX in \"/etc/default/grub\".")
+            exit(1)
+        else:
+            idx=line.rfind("\"")
+            out_lines.append(line[:idx]+" rd.luks.options=tries=0"+line[idx:])
+
+with open("/etc/default/grub","w") as f:
+    for line in out_lines:
+        f.write(line)
+'

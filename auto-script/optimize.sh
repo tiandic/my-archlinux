@@ -104,3 +104,6 @@ with open("/etc/default/grub","w") as f:
     for line in out_lines:
         f.write(line)
 '
+
+echo "D /home/${USER}/tmp 1777 root root -" | sudo tee /etc/tmpfiles.d/mytmp.conf
+sudo systemd-tmpfiles --create

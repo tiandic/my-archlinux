@@ -9,7 +9,7 @@ sudo pacman -S --noconfirm --needed niri qt6-multimedia-ffmpeg xwayland-satellit
 niri-session &
 
 while ! [[ -f ~/.config/niri/config.kdl ]]; do
-    sleep 1
+  sleep 1
 done
 
 killall niri
@@ -20,17 +20,17 @@ sed -i 's/alacritty/kitty/g' ~/.config/niri/config.kdl
 sudo pacman -S --noconfirm --needed libnotify mako
 
 # 输入法
-sudo pacman -S --noconfirm --needed fcitx5-im fcitx5-rime rime-ice-git  # fcitx5-im 是一个包组 让你选择安装其中哪些包时,直接回车安装所有包即可
+sudo pacman -S --noconfirm --needed fcitx5-im fcitx5-rime rime-ice-git # fcitx5-im 是一个包组 让你选择安装其中哪些包时,直接回车安装所有包即可
 
-fcitx5 -d &> /dev/null
+fcitx5 -d &>/dev/null
 
-while ! [[ -d ~/.config/fcitx5/conf ]] ; do
-    sleep 1
+while ! [[ -d ~/.config/fcitx5/conf ]]; do
+  sleep 1
 done
 
 mkdir -p ~/.local/share/fcitx5/rime
 
-cat > ~/.local/share/fcitx5/rime/default.custom.yaml << EOF
+cat >~/.local/share/fcitx5/rime/default.custom.yaml <<EOF
 patch:
   # 这里的 rime_ice_suggestion 为雾凇方案的默认预设
   __include: rime_ice_suggestion:/
@@ -38,26 +38,24 @@ EOF
 
 echo 'XMODIFIERS="@im=fcitx"' | sudo tee -a /etc/environment
 # 最后,需要在 `~/.config/niri/config.kdl` 为`fcitx5` 配置启动,以在进入`niri`后可以直接使用`fcitx5`,而无需手动启动 (上面的 `mako` 是因为其在`/usr/lib/systemd/user/mako.service`中有`WantedBy=graphical-session.target`,所以无需手动配置启动)
-echo 'spawn-at-startup "fcitx5" "-d"' >>  ~/.config/niri/config.kdl
+echo 'spawn-at-startup "fcitx5" "-d"' >>~/.config/niri/config.kdl
 
 killall fcitx5
-cat > ~/.config/fcitx5/config << EOF
+cat >~/.config/fcitx5/config <<EOF
 [Hotkey]
-# Enumerate when holding modifier of Toggle key
+# 按住切换键的修饰键时进行轮换切换
 EnumerateWithTriggerKeys=True
-# Enumerate Input Method Forward
+# 向前切换输入法
 EnumerateForwardKeys=
-# Enumerate Input Method Backward
+# 向后切换输入法
 EnumerateBackwardKeys=
-# Skip first input method while enumerating
+# 轮换输入法时跳过第一个输入法
 EnumerateSkipFirst=False
-# Time limit in milliseconds for triggering modifier key shortcuts
+# 触发修饰键快捷键的时限 (毫秒)
 ModifierOnlyKeyTimeout=250
 
 [Hotkey/TriggerKeys]
 0=Control+space
-1=Zenkaku_Hankaku
-2=Hangul
 
 [Hotkey/ActivateKeys]
 0=Hangul_Hanja
@@ -66,7 +64,7 @@ ModifierOnlyKeyTimeout=250
 0=Hangul_Romaja
 
 [Hotkey/AltTriggerKeys]
-0=Shift_L
+0=Control+space
 
 [Hotkey/EnumerateGroupForwardKeys]
 0=Super+space
@@ -90,27 +88,27 @@ ModifierOnlyKeyTimeout=250
 0=Control+Alt+P
 
 [Behavior]
-# Active By Default
+# 默认激活输入法
 ActiveByDefault=False
-# Reset state on Focus In
+# 重新聚焦时重置状态
 resetStateWhenFocusIn=No
-# Share Input State
+# 共享输入状态
 ShareInputState=No
-# Show preedit in application
+# 在程序中显示预编辑文本
 PreeditEnabledByDefault=True
-# Show Input Method Information when switch input method
+# 切换输入法时显示输入法信息
 ShowInputMethodInformation=True
-# Show Input Method Information when changing focus
+# 在焦点更改时显示输入法信息
 showInputMethodInformationWhenFocusIn=False
-# Show compact input method information
+# 显示紧凑的输入法信息
 CompactInputMethodInformation=True
-# Show first input method information
+# 显示第一个输入法的信息
 ShowFirstInputMethodInformation=True
-# Default page size
+# 缺省每页候选词
 DefaultPageSize=5
-# Override XKB Option
+# 覆盖 XKB 选项
 OverrideXkbOption=False
-# Custom XKB Option
+# 自定义 XKB 选项
 CustomXkbOption=
 # Force Enabled Addons
 EnabledAddons=
@@ -118,15 +116,16 @@ EnabledAddons=
 DisabledAddons=
 # Preload input method to be used by default
 PreloadInputMethod=True
-# Allow input method in the password field
+# 允许在密码框中使用输入法
 AllowInputMethodForPassword=False
-# Show preedit text when typing password
+# 输入密码时显示预编辑文本
 ShowPreeditForPassword=False
-# Interval of saving user data in minutes
+# 保存用户数据的时间间隔（以分钟为单位）
 AutoSavePeriod=30
 
 EOF
-cat > ~/.config/fcitx5/profile << EOF
+
+cat >~/.config/fcitx5/profile <<EOF
 [Groups/0]
 # Group Name
 Name=Default
@@ -137,12 +136,6 @@ DefaultIM=rime
 
 [Groups/0/Items/0]
 # Name
-Name=keyboard-us
-# Layout
-Layout=
-
-[Groups/0/Items/1]
-# Name
 Name=rime
 # Layout
 Layout=
@@ -152,13 +145,13 @@ Layout=
 
 EOF
 
-fcitx5 -d &> /dev/null
+fcitx5 -d &>/dev/null
 
 yay -S --noconfirm hyprlock
 
-if ! [[ -f ~/.config/hypr/hyprlock.conf ]] ; then
-    mkdir -p ~/.config/hypr
-    cat > ~/.config/hypr/hyprlock.conf << EOF
+if ! [[ -f ~/.config/hypr/hyprlock.conf ]]; then
+  mkdir -p ~/.config/hypr
+  cat >~/.config/hypr/hyprlock.conf <<EOF
 # ~/.config/hypr/hyprlock.conf
 
 background {
@@ -181,7 +174,7 @@ sed -i 's/swaylock/hyprlock/g' ~/.config/niri/config.kdl
 yay -S --noconfirm wl-clipboard clipse
 
 # 为其剪贴板配置启动
-echo 'spawn-at-startup "clipse" "--listen"' >>  ~/.config/niri/config.kdl
+echo 'spawn-at-startup "clipse" "--listen"' >>~/.config/niri/config.kdl
 
 # 配置快捷键
 sed -i '/Mod+Shift+P { power-off-monitors; }/a \
@@ -192,7 +185,7 @@ sed -i '/Mod+Shift+P { power-off-monitors; }/a \
 yay -S --noconfirm awww waypaper
 
 # 配置启动
-echo 'spawn-at-startup "awww-daemon"' >>  ~/.config/niri/config.kdl
+echo 'spawn-at-startup "awww-daemon"' >>~/.config/niri/config.kdl
 
 # 面板
 sudo pacman -S --noconfirm --needed waybar
@@ -216,8 +209,7 @@ sed -i '/Mod+Shift+P { power-off-monitors; }/a \
     Mod+F4 hotkey-overlay-title="Open the logout menu" { spawn "wlogout"; }' .config/niri/config.kdl
 
 # 文件管理器
-sudo pacman -S --noconfirm --needed yazi     # 一个终端文件管理器
+sudo pacman -S --noconfirm --needed yazi # 一个终端文件管理器
 sed -i '/Mod+Shift+P { power-off-monitors; }/a \
 \
     Mod+E hotkey-overlay-title="Open the file manager." { spawn "kitty" "-e" "yazi"; }' .config/niri/config.kdl
-

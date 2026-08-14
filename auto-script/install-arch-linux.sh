@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+is_UEFI="false"
 DISK="$1"
 
 if [[ ! -b "$DISK" ]] ; then
@@ -8,9 +9,16 @@ if [[ ! -b "$DISK" ]] ; then
     exit 1
 fi
 
+[ -d /sys/firmware/efi ] && is_UEFI="true"
+
 # 创建分区
 sgdisk --zap-all "$DISK"
-sgdisk -n "1:0:+512M" -t "1:ef00" -c "1:EFI" "$DISK"
+
+if [ $is_UEFI = 'true' ]; then
+    sgdisk -n "1:0:+512M" -t "1:ef00" -c "1:EFI" "$DISK"
+else
+    sgdisk -n "1:0:+1M" -t "1:ef02" -c "1:BIOS boot" "$DISK"
+fi
 sgdisk -n "2:0:+2G" -t "2:8300" -c "2:boot" "$DISK"
 sgdisk -n "3:0:0" -t "3:8309" -c "3:luks" "$DISK"
 partprobe "$DISK"
@@ -25,13 +33,12 @@ else
     LUKS_PART="${DISK}3"
 fi
 
-
 # 格式化加密分区并设置密码
 cryptsetup luksFormat "$LUKS_PART"
 cryptsetup open "$LUKS_PART" cryptroot
 
 # 格式化分区
-mkfs.fat -F32 "$EFI_PART"
+[ $is_UEFI = true ] && mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 "$BOOT_PART"
 mkfs.btrfs /dev/mapper/cryptroot
 mount /dev/mapper/cryptroot /mnt
@@ -44,14 +51,15 @@ mount -o subvol=@,compress=zstd,noatime,space_cache=v2,discard=async /dev/mapper
 mkdir -p /mnt/{home,swap,boot}
 
 mount "$BOOT_PART" /mnt/boot
-mkdir /mnt/boot/efi
-mount "$EFI_PART" /mnt/boot/efi
+[ $is_UEFI = true ] && mkdir /mnt/boot/efi
+[ $is_UEFI = true ] && mount "$EFI_PART" /mnt/boot/efi
 
 mount -o subvol=@home,compress=zstd,space_cache=v2,discard=async /dev/mapper/cryptroot /mnt/home
 mount -o subvol=@swap,noatime,space_cache=v2 /dev/mapper/cryptroot /mnt/swap
 
 # 安装系统
-pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub efibootmgr btrfs-progs
+pacstrap -K /mnt base linux linux-firmware networkmanager vim tmux grub btrfs-progs
+[ $is_UEFI = true ] && pacstrap /mnt efibootmgr 
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -90,7 +98,11 @@ sed -i 's/^HOOKS=(.*/HOOKS=(base systemd autodetect microcode modconf kms keyboa
 mkinitcpio -P
 
 # grub
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
+if [ $is_UEFI = true ]; then
+    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
+else
+    grub-install ${DISK}
+fi
 sed -i "s/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"rd.luks.name=${LUKS_UUID}=cryptroot root=\/dev\/mapper\/cryptroot\"/" /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 

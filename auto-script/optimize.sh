@@ -69,6 +69,8 @@ done
 
 [ -e ~/.zshrc ] && mv ~/.zshrc "~/.zshrc.$(date +"%Y-%m-%d_%H:%M.%S").bak"
 
+yay -S td-fcitx5-rime-git
+
 stow kitty
 stow rofi
 stow nvim
@@ -76,7 +78,6 @@ stow zsh
 stow waybar
 stow niri
 stow fctix5-rime
-stow fctix5-rime-icon
 
 # 配置 Win键 打开 rofi
 yay -S --noconfirm --needed keyd
